@@ -56,7 +56,7 @@
       var t = (Math.floor((maintenant - DELAI) / PERIODE) + 1) * PERIODE + DELAI;
       var d = new Date(t);
       document.getElementById("next").textContent =
-        "Prochaine mise à jour vers " + deux(d.getHours()) + "h" + deux(d.getMinutes());
+        "PROCHAINE MISE A JOUR VERS " + deux(d.getHours()) + "H" + deux(d.getMinutes());
     }
 
     function refresh() {
