@@ -28,26 +28,53 @@
       font-weight: bold;
       line-height: 1;
     }
+    #next {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 0 1rem 1.2rem;
+      text-align: center;
+      font-size: 1.3rem;
+      color: #888;
+    }
   </style>
 </head>
 <body>
   <div id="count">…</div>
+  <div id="next"></div>
 
   <script>
-    async function refresh() {
-      try {
-        const r = await fetch("data.json?t=" + Date.now(), { cache: "no-store" });
-        const d = await r.json();
-        if (d.followers > 0) {
-          document.getElementById("count").textContent =
-            d.followers.toLocaleString("fr-FR");
-        }
-      } catch (e) {
-        /* on garde le dernier chiffre affiché */
-      }
+    var PERIODE = 30 * 60 * 1000;   // le workflow tourne toutes les 30 minutes (:00 et :30 UTC)
+    var DELAI = 3 * 60 * 1000;      // marge : retard GitHub + publication de la page (~3 min)
+
+    function deux(n) { return n < 10 ? "0" + n : "" + n; }
+
+    function prochaineMaj() {
+      var maintenant = Date.now();
+      // prochaine exécution planifiée + marge pour que le nouveau chiffre soit en ligne
+      var t = (Math.floor((maintenant - DELAI) / PERIODE) + 1) * PERIODE + DELAI;
+      var d = new Date(t);
+      document.getElementById("next").textContent =
+        "Prochaine mise à jour vers " + deux(d.getHours()) + "h" + deux(d.getMinutes());
     }
+
+    function refresh() {
+      fetch("data.json?t=" + Date.now(), { cache: "no-store" })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (d.followers > 0) {
+            document.getElementById("count").textContent =
+              d.followers.toLocaleString("fr-FR");
+          }
+        })
+        .catch(function () { /* on garde le dernier chiffre affiché */ });
+    }
+
     refresh();
+    prochaineMaj();
     setInterval(refresh, 60000);
+    setInterval(prochaineMaj, 30000);
   </script>
 </body>
 </html>
